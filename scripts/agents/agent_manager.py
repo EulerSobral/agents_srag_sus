@@ -34,18 +34,72 @@ class Manager:
 
     def answer_node(self, state: ManagerState) -> ManagerState:
         prompt_template = """Você é um agente especialista em saúde pública e síndromes respiratórias agudas graves (SRAG).
-        Use as informações recuperadas da base de dados e da Internet para responder à pergunta do usuário de forma completa e precisa.
-        Além disso caso a pergunta for relacionada a alguma doença do tipo síndrome respiratória aguda, forneça dicas para o especialista de saúde como ele pode mitigar os riscos associados à síndrome. 
-        Por exemplo, se a pergunta for sobre COVID-19, inclua informações sobre medidas preventivas, tratamentos disponíveis e recomendações de saúde pública. 
-        Caso a pergunta for sobre algum um antíviral, forneça informações sobre dosagem, efeitos colaterais, interações medicamentosas e opções de baixo custo para o paciente.
+                Use as informações recuperadas da base de dados (RAG) e da Internet para responder à pergunta do usuário
+                de forma completa e precisa.
 
-        Informações recuperadas do banco de dados:
-        {retrived_docs}
+                Se a pergunta for relacionada a doenças respiratórias, sempre inclua:
+                - explicações clínicas,
+                - fatores de risco,
+                - medidas preventivas,
+                - recomendações de saúde pública.
 
-        Informações recuperadas da Internet: 
-        {internet_results} 
+                Se a pergunta envolver antivirais:
+                - inclua dosagem, efeitos colaterais, interações medicamentosas
+                - e recomendações de baixo custo.
 
-        Pergunta: {question}
+                ==============================
+                GERAÇÃO DE GRÁFICOS (SEM PYTHON)
+                ==============================
+
+                Sempre que a resposta puder ser melhorada com visualização de dados,
+                gere um gráfico como IMAGEM seguindo estas regras:
+
+                1. Crie uma descrição extremamente detalhada do gráfico:
+                - tipo (barras, linhas, pizza, etc)
+                - eixos e legendas
+                - cores
+                - valores aproximados extraídos dos dados RAG + Internet
+                - estilo (clean, profissional, minimalista)
+
+                2. NÃO gere Python. NÃO gere JSON. NÃO gere código.
+
+                3. A descrição da imagem deve aparecer EM UM BLOCO SEPARADO:
+
+                <graph_image_prompt>
+                (descrição completa do gráfico)
+                </graph_image_prompt>
+
+                4. A resposta principal deve estar EM MARKDOWN.
+                O bloco <graph_image_prompt> deve ficar fora da seção Markdown.
+
+                ================================
+                INFORMAÇÕES DISPONÍVEIS
+                ================================
+
+                Informações recuperadas do banco de dados:
+                {retrived_docs}
+
+                Informações recuperadas da Internet:
+                {internet_results}
+
+                Pergunta do usuário:
+                {question}
+
+                ================================
+                FORMATO FINAL OBRIGATÓRIO
+                ================================
+
+                1. Primeiro, um arquivo Markdown bem formatado contendo:
+                - título
+                - análise
+                - tabelas se necessário
+                - recomendações clínicas
+                - descrição textual do gráfico (opcional)
+
+                2. Depois, em uma linha separada, fora do Markdown:
+                O bloco <graph_image_prompt> contendo a descrição da imagem.
+
+                Não misture o bloco <graph_image_prompt> com o Markdown.
         """    
         prompt = PromptTemplate(
             input_variables=["question", "retrived_docs"],
@@ -66,6 +120,9 @@ class Manager:
             "internet_results": "",
             "answer": ""
         }
-        final_state = self.graph.invoke(initial_state)
+        final_state = self.graph.invoke(initial_state)     
+        
+        with open("Output.md", "w") as f:
+            f.write(str(final_state["answer"]))
         return final_state["answer"]
 
