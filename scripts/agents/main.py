@@ -1,7 +1,6 @@
 from agent_manager import Manager
 
-question = """Posso usar o Oseltamivir em pacientes com síndrome  
-            respiratória aguda grave (SRAG) e que apresentam fatores de risco, como hipertensão  
+question = """Ainda existe casos graves de COVID-19 no Brasil em 2024 ?
         ?"""
 
 manager = Manager(path="/home/euler/projeto_srag_agents/datalake/gold/*.csv")
