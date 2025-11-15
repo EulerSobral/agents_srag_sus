@@ -1,18 +1,12 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+import pandas as pd  
 
-spark = SparkSession.builder \
-        .appName("TreatedData") \
-        .master("local[*]") \
-        .getOrCreate()
+def load_data(file_path: str): 
+    df = pd.read_csv(file_path, sep=";", on_bad_lines="skip")  
+    return df
 
-def load_data(file_path):
-    df = spark.read.parquet(file_path)
-    return df  
-
-def treated_data(df):
+def treated_data(df): 
     columns_important = [
-        'NU_IDADE_N', 'CS_GESTANT', 'AVE_SUINO', 'FEBRE',  
+        'DT_NOTIFIC', 'AVE_SUINO', 'FEBRE',  
         'TOSSE', 'GARGANTA', 'DISPNEIA', 'DESC_RESP',  
         'DIARREIA', 'VOMITO', 'FATOR_RISC', 
         'VACINA', 'ANTIVIRAL', 'TP_ANTIVIR', 'UTI', 
@@ -20,25 +14,26 @@ def treated_data(df):
         'SURTO_SG', 'CO_DETEC'
     ]
 
-    df_raw_important = df.select(*columns_important)
-    df_treated = df_raw_important.fillna("0", subset=columns_important)
+    df_raw_important = df[columns_important] 
+    df_treated_nan = df_raw_important.fillna("0")
+    df_treated = df_treated_nan.drop_duplicates()
+    
+    return df_treated 
 
-    path_save = "/home/euler/projeto_srag_agents/datalake/silver" 
- 
-    
-    df_treated.write.format("csv") \
-        .option("header", "true") \
-        .option("delimiter", ",") \
-        .mode("overwrite") \
-        .save(path_save)
-    
+def save_treated_data(df_treated, output_path: str): 
+    df_treated.to_csv(output_path, sep=";", index=False)
+
 if __name__ == "__main__":  
-    file_path = "/home/euler/projeto_srag_agents/datalake/bronze/*.parquet"
+    file_path = "/home/euler/projeto_srag_agents/datalake/bronze/srag_2025.csv"
     
     df = load_data(file_path) 
 
-    df.printSchema() 
-    df.show(5)      
+    print("Data raw loaded successfully.") 
+    print(df.head())
     
-    treated_data(df)
-    spark.stop()
+    print("Starting data treatment...")
+    df_treated = treated_data(df) 
+    print(df_treated.head()) 
+
+    print("Saving treated data...") 
+    save_treated_data(df_treated, "/home/euler/projeto_srag_agents/datalake/silver/srag_treated_2025.csv")

@@ -1,9 +1,14 @@
+import os 
+import pandas as pd
+
 from typing import TypedDict, List 
 from langchain_openai import ChatOpenAI 
 from langgraph.graph import StateGraph
 from agent_document import AgentDocument
 from agent_internet import AgentInternet 
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate 
+
+from tools.tool_visualization import visualize_last_30_days
 
 class ManagerState(TypedDict):
     question: str 
@@ -36,6 +41,12 @@ class Manager:
         prompt_template = """Você é um agente especialista em saúde pública e síndromes respiratórias agudas graves (SRAG).
                 Use as informações recuperadas da base de dados (RAG) e da Internet para responder à pergunta do usuário
                 de forma completa e precisa.
+                
+                Você deve comentar e analisar as seguintes métricas disponíveis na base de dados: 
+                - taxa de aumento de casos
+                - taxa de mortalidade
+                - taxa de ocupação de UTI
+                - taxa de vacinação da população
 
                 Se a pergunta for relacionada a doenças respiratórias, sempre inclua:
                 - explicações clínicas,
@@ -47,34 +58,7 @@ class Manager:
                 - inclua dosagem, efeitos colaterais, interações medicamentosas
                 - e recomendações de baixo custo.
 
-                ==============================
-                GERAÇÃO DE GRÁFICOS (SEM PYTHON)
-                ==============================
 
-                Sempre que a resposta puder ser melhorada com visualização de dados,
-                gere um gráfico como IMAGEM seguindo estas regras:
-
-                1. Crie uma descrição extremamente detalhada do gráfico:
-                - tipo (barras, linhas, pizza, etc)
-                - eixos e legendas
-                - cores
-                - valores aproximados extraídos dos dados RAG + Internet
-                - estilo (clean, profissional, minimalista)
-
-                2. NÃO gere Python. NÃO gere JSON. NÃO gere código.
-
-                3. A descrição da imagem deve aparecer EM UM BLOCO SEPARADO:
-
-                <graph_image_prompt>
-                (descrição completa do gráfico)
-                </graph_image_prompt>
-
-                4. A resposta principal deve estar EM MARKDOWN.
-                O bloco <graph_image_prompt> deve ficar fora da seção Markdown.
-
-                ================================
-                INFORMAÇÕES DISPONÍVEIS
-                ================================
 
                 Informações recuperadas do banco de dados:
                 {retrived_docs}
@@ -94,12 +78,8 @@ class Manager:
                 - análise
                 - tabelas se necessário
                 - recomendações clínicas
-                - descrição textual do gráfico (opcional)
 
-                2. Depois, em uma linha separada, fora do Markdown:
-                O bloco <graph_image_prompt> contendo a descrição da imagem.
-
-                Não misture o bloco <graph_image_prompt> com o Markdown.
+              Gere um arquivo Markdown detalhado como resposta final à pergunta do usuário.
         """    
         prompt = PromptTemplate(
             input_variables=["question", "retrived_docs"],
@@ -121,8 +101,20 @@ class Manager:
             "answer": ""
         }
         final_state = self.graph.invoke(initial_state)     
+         
+        df = pd.read_csv("/home/euler/projeto_srag_agents/datalake/gold/srag_2025_final_processed.csv", sep=";")
         
-        with open("Output.md", "w") as f:
+        output_directory = "/home/euler/projeto_srag_agents/output/"
+        file_name = "visualization_last_30_days.png"
+        
+        os.makedirs(output_directory, exist_ok=True)
+       
+ 
+        full_path = os.path.join(output_directory, file_name)
+        
+        visualize_last_30_days(df, full_path)
+        print(f"Gráfico salvo com sucesso em: {full_path}")
+        
+        with open("/home/euler/projeto_srag_agents/output/Output.md", "w") as f:
             f.write(str(final_state["answer"]))
         return final_state["answer"]
-
