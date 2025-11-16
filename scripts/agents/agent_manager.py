@@ -8,7 +8,7 @@ from agent_document import AgentDocument
 from agent_internet import AgentInternet 
 from langchain_core.prompts import PromptTemplate 
 
-from tools.tool_visualization import visualize_last_30_days
+from tools.tool_visualization import visualize_last_30_days, visualize_last_12_months
 
 class ManagerState(TypedDict):
     question: str 
@@ -105,15 +105,18 @@ class Manager:
         df = pd.read_csv("/home/euler/projeto_srag_agents/datalake/gold/srag_2025_final_processed.csv", sep=";")
         
         output_directory = "/home/euler/projeto_srag_agents/output/"
-        file_name = "visualization_last_30_days.png"
-        
+        file_name_30_days = "visualization_last_30_days.png"
+        file_name_12_months = "visualization_last_12_months.png"
+
         os.makedirs(output_directory, exist_ok=True)
        
  
-        full_path = os.path.join(output_directory, file_name)
-        
-        visualize_last_30_days(df, full_path)
-        print(f"Gráfico salvo com sucesso em: {full_path}")
+        full_path_30_days = os.path.join(output_directory, file_name_30_days)
+        full_path_12_months = os.path.join(output_directory, file_name_12_months)
+
+        visualize_last_30_days(df,  full_path_30_days) 
+        visualize_last_12_months(df, full_path_12_months)
+        print(f"Gráficos salvo com sucesso")
         
         with open("/home/euler/projeto_srag_agents/output/Output.md", "w") as f:
             f.write(str(final_state["answer"]))
