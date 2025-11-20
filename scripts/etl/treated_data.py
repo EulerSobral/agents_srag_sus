@@ -5,6 +5,10 @@ def load_data(file_path: str):
     return df
 
 def treated_data(df): 
+    
+    """ Trata os dados brutos removendo colunas irrelevantes,  
+    lidando com valores ausentes e eliminando duplicatas."""
+    
     columns_important = [
         'DT_NOTIFIC', 'AVE_SUINO', 'FEBRE',  
         'TOSSE', 'GARGANTA', 'DISPNEIA', 'DESC_RESP',  

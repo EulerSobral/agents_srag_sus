@@ -1,5 +1,6 @@
 import os
 import glob
+import logging
 import pandas as pd
 from typing import TypedDict, List
 from dotenv import load_dotenv
@@ -9,6 +10,10 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 
 class AgentDocument():  
+    """ 
+    Agente responsável por recuperar informações de documentos armazenados localmente.
+    """
+    
     load_dotenv()
     os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
     def __init__(self, path: str):  
@@ -40,10 +45,15 @@ class AgentDocument():
         vector_store = FAISS.from_documents(docs, embedding=embeddings)
         retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 5})
 
+        logging.info(f"RAG Retriever create with documents {len(docs)}")
+
         return retriever
 
     def create_new_state(self, state: dict) -> dict:
         information = self.retriever.invoke(state["question"]) 
         split_information = "\n".join([doc.page_content for doc in information])  
         state['retrived_docs'] = split_information 
+        
+        logging.info("Storage information from rag in state retrived_docs.")
+        
         return state

@@ -1,6 +1,12 @@
 import pandas as pd
 
-def final_processing_data(file_path):
+def final_processing_data(file_path): 
+
+    """ Retira os valores numéricos e converte para valores categóricos mais descritivos. 
+    Também converte a coluna de data para o formato YYYY-MM-DD.
+    """
+
+
     print(f"Iniciando processamento. Lendo arquivos de: {file_path}")
     
     output_path = "/home/euler/projeto_srag_agents/datalake/gold/srag_2025_final_processed.csv"
