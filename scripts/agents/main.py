@@ -1,7 +1,14 @@
+import os
 from agent_manager import Manager
 
-question = """Existem casos de internação em UTI por causa de vírus sincicial respiratório (VSR) ?"""
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))   
+PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  
 
-manager = Manager(path="/home/euler/projeto_srag_agents/datalake/gold/*.csv")
+
+GOLD_PATH = os.path.join(PROJECT_ROOT, "datalake", "gold", "srag_2025_final_processed.csv")
+
+question = """Ainda existe casos graves de COVID-19 no Brasil em 2024 ?"""
+
+manager = Manager(path=GOLD_PATH)
 resposta = manager.run_agent(question)
 print(resposta)

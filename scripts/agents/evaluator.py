@@ -16,11 +16,20 @@ os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 
 client = Client()
 
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))   
+PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))  
+
+
+GOLD_PATH = os.path.join(PROJECT_ROOT, "datalake", "gold", "srag_2025_final_processed.csv")
 
 @traceable(name="srag_covid19_brazil_2024_evaluation_agent")
-def run_eval_agent(question: str) -> str:
-    """Executa o agente principal e retorna a resposta final."""
-    manager = Manager(path="/home/euler/projeto_srag_agents/datalake/gold/*.csv")
+def run_eval_agent(example: str) -> str:
+    """Executa o agente principal e retorna a resposta final.""" 
+    if isinstance(example, dict):
+        question = example.get("input") or example.get("question")
+    else:
+        question = example
+    manager = Manager(path=GOLD_PATH)
     answer = manager.run_agent(question)
     logging.info("Manager agent executed successfully.")
     return answer

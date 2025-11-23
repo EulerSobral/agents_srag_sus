@@ -1,21 +1,36 @@
-import requests   
+import requests
 import logging
+import os
 
-YEAR = 2025 
-FINAL_NUMBER_YEAR = 25
+YEAR = 2025
 
-def extract_data() -> None: 
-    """Extrai os dados de SRAG do ano especificado e salva em um arquivo CSV."""
+def extract_data() -> None:
+    url = (
+        "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/"
+        "SRAG/2025/INFLUD25-10-11-2025.csv"
+    )
 
 
-    url = f"https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SRAG/2025/INFLUD25-10-11-2025.csv"
-    output_path = f"/home/euler/projeto_srag_agents/datalake/bronze/srag_{YEAR}.csv"
-        
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        current_dir = os.getcwd()
+
+    project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
+
+    datalake_dir = os.path.join(project_root, "datalake", "bronze")
+
+    os.makedirs(datalake_dir, exist_ok=True)
+
+    output_path = os.path.join(datalake_dir, f"srag_{YEAR}.csv")
+    
     response = requests.get(url)
-    response.raise_for_status()  
-        
-    with open(output_path, 'wb') as file:
-        file.write(response.content)
-    logging.info(f"Data for year {YEAR} extracted and saved to {output_path}")    
+    response.raise_for_status()
+
+    with open(output_path, "wb") as f:
+        f.write(response.content)
+
+    logging.info(f"Data saved to {output_path}")
+
 if __name__ == "__main__":
     extract_data()

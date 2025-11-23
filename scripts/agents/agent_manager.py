@@ -11,11 +11,21 @@ from langchain_core.prompts import PromptTemplate
 
 from tools.tool_visualization import visualize_last_30_days, visualize_last_12_months
 
+
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_DIR)))
+
+DATALAKE_DIR = os.path.join(PROJECT_ROOT, "projeto_srag_agents","datalake")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "projeto_srag_agents","output")
+
+
 class ManagerState(TypedDict):
     question: str 
     retrived_docs: str 
     internet_results: str
     answer: str
+
 
 class Manager: 
     """ 
@@ -65,8 +75,6 @@ class Manager:
                 - inclua dosagem, efeitos colaterais, interações medicamentosas
                 - e recomendações de baixo custo.
 
-
-
                 Informações recuperadas do banco de dados:
                 {retrived_docs}
 
@@ -89,19 +97,21 @@ class Manager:
               Gere um arquivo do tipo md detalhado como resposta final à pergunta do usuário.
         """    
         prompt = PromptTemplate(
-            input_variables=["question", "retrived_docs"],
+            input_variables=["question", "retrived_docs", "internet_results"],
             template=prompt_template
         )
+
         prompt_filled = prompt.format(
             question=state["question"],
             retrived_docs="\n".join(state["retrived_docs"]),
             internet_results=state.get("internet_results","")
         )
+
         response = self.llm.invoke(prompt_filled)
 
-        logging.info("Generated answer using LLM based on retrieved documents and internet results and buid one prompt with role and information for Manager Agent.")
+        logging.info("Generated answer using LLM based on retrieved documents and internet results and built one prompt with role and information for Manager Agent.")
 
-        return {**state,"answer": response.content}  
+        return {**state, "answer": response.content}  
     
     def run_agent(self, question: str) -> str:
         initial_state: ManagerState = {
@@ -110,27 +120,29 @@ class Manager:
             "internet_results": "",
             "answer": ""
         }
-        final_state = self.graph.invoke(initial_state)     
-         
-        df = pd.read_csv("/home/euler/projeto_srag_agents/datalake/gold/srag_2025_final_processed.csv", sep=";")
-        
-        output_directory = "/home/euler/projeto_srag_agents/output/"
-        file_name_30_days = "visualization_last_30_days.png"
-        file_name_12_months = "visualization_last_12_months.png"
 
-        os.makedirs(output_directory, exist_ok=True)
+        final_state = self.graph.invoke(initial_state)
+
        
- 
-        full_path_30_days = os.path.join(output_directory, file_name_30_days)
-        full_path_12_months = os.path.join(output_directory, file_name_12_months)
+        df_path = os.path.join(DATALAKE_DIR, "gold", "srag_2025_final_processed.csv")
+        df = pd.read_csv(df_path, sep=";")
 
-        visualize_last_30_days(df,  full_path_30_days) 
-        visualize_last_12_months(df, full_path_12_months)
+    
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+        file_30 = os.path.join(OUTPUT_DIR, "visualization_last_30_days.png")
+        file_12 = os.path.join(OUTPUT_DIR, "visualization_last_12_months.png")
+
+        visualize_last_30_days(df, file_30) 
+        visualize_last_12_months(df, file_12)
+
         logging.info("Generated visualizations for the last 30 days and last 12 months.")
-        
-        with open("/home/euler/projeto_srag_agents/output/Output.md", "w") as f:
+
+       
+        output_md = os.path.join(OUTPUT_DIR, "Output.md")
+        with open(output_md, "w") as f:
             f.write(str(final_state["answer"]))  
-        
+
         logging.info("Final answer written to Output.md file.")
 
         return final_state["answer"]
