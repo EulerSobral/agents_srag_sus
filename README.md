@@ -2,12 +2,16 @@
 
 Antes de executar o sistema, obtenha as seguintes variáveis de ambiente para continuar com a execução do sistema: 
 
-OPENAI_API_KEY=
+OPENAI_API_KEY= 
+
 TAVILY_API_KEY= 
 
 LANGCHAIN_TRACING_V2="true"
+
 LANGCHAIN_PROJECT="default"
+
 LANGCHAIN_API_KEY=""  
+
 LANGHAIN_ENDPOINT="" 
 
 Quando você obter essas variáveis, inclua elas o valor delas no arquivo .env
