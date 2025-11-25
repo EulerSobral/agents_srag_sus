@@ -14,7 +14,19 @@ LANGCHAIN_API_KEY=""
 
 LANGHAIN_ENDPOINT="" 
 
-Quando você obter essas variáveis, inclua elas o valor delas no arquivo .env
+Quando você obter essas variáveis, inclua elas o valor delas no arquivo .env  
+
+## Requisitos 
+
+Python 3.9 ou versão mais atualizada  
+
+Git instalado em sua máquina =
+
+## Clonando o repositório 
+
+```  
+git clone https://github.com/EulerSobral/agents_srag_sus.git
+```
 
 ## Obtendo os dados 
 

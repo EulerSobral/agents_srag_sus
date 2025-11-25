@@ -9,9 +9,7 @@ from langchain_core.prompts import PromptTemplate
 from agent_manager import Manager 
 from qa_evaluator import QAEvalUniversal
 
-# =============================
-# CONFIGURAÇÃO DE AMBIENTE
-# =============================
+
 load_dotenv()
 os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2", "true")
 os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "default")
@@ -19,23 +17,12 @@ os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 
 client = Client()
 
-# =============================
-# RESOLUÇÃO DE CAMINHOS
-# =============================
 
-# pasta atual: scripts/agents/
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
-
-# raiz do projeto: projeto_srag_agents/
 PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))
-
-# caminho relativo para datalake/gold
 GOLD_PATH = os.path.join(PROJECT_ROOT, "datalake", "gold", "srag_2025_final_processed.csv")
 
 
-# =============================
-# AGENTE DE AVALIAÇÃO
-# =============================
 @traceable(name="srag_covid19_brazil_2024_evaluation_agent")
 def run_eval_agent(example: str) -> str:
     """Executa o agente principal e retorna a resposta final.""" 
