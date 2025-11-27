@@ -4,7 +4,7 @@ Aplicação de uma prova de conceito para avaliar a viabilidade de um sistema qu
 
 # Tutorial para executar o projeto 
 
-(Clique aqui)[https://www.youtube.com/watch?v=dRFvq--Vbew] para acessar o tutorial de execução do projeto
+[Clique aqui](https://www.youtube.com/watch?v=dRFvq--Vbew) para acessar o tutorial de execução do projeto
 
 # Como rodar o Agente de SRAG 
 
