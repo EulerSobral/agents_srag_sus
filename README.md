@@ -31,6 +31,11 @@ Git instalado em sua máquina
 ```  
 git clone https://github.com/EulerSobral/agents_srag_sus.git
 ```
+## Instalando dependências 
+
+```  
+pip install -r requirements/requirements.txt
+```
 
 ## Obtendo os dados 
 
