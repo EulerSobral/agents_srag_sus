@@ -1,6 +1,10 @@
+# Contexto   
+
+Aplicação de uma prova de conceito para avaliar a viabilidade de um sistema que auxlia profissionais da área de saúde a ter um entendimento em tepo real sobre a severidade de surto de doenças.
+
 # Como rodar o Agente de SRAG 
 
-Antes de executar o sistema, obtenha as seguintes variáveis de ambiente para continuar com a execução do sistema: 
+Antes de executar o sistema, obtenha o valor as seguintes variáveis de ambiente para continuar com a execução do sistema: 
 
 OPENAI_API_KEY= 
 
@@ -14,13 +18,13 @@ LANGCHAIN_API_KEY=""
 
 LANGHAIN_ENDPOINT="" 
 
-Quando você obter essas variáveis, inclua elas o valor delas no arquivo .env  
+Quando você obter essas variáveis, inclua elas o valor delas no arquivo example.env  
 
 ## Requisitos 
 
 Python 3.9 ou versão mais atualizada  
 
-Git instalado em sua máquina =
+Git instalado em sua máquina
 
 ## Clonando o repositório 
 
