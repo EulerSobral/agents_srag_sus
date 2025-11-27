@@ -2,6 +2,10 @@
 
 Aplicação de uma prova de conceito para avaliar a viabilidade de um sistema que auxlia profissionais da área de saúde a ter um entendimento em tepo real sobre a severidade de surto de doenças.
 
+# Tutorial para executar o projeto 
+
+(Clique aqui)[https://www.youtube.com/watch?v=dRFvq--Vbew] para acessar o tutorial de execução do projeto
+
 # Como rodar o Agente de SRAG 
 
 Antes de executar o sistema, obtenha o valor as seguintes variáveis de ambiente para continuar com a execução do sistema: 
