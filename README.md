@@ -1,6 +1,10 @@
 # Contexto   
 
-Aplicação de uma prova de conceito para avaliar a viabilidade de um sistema que auxlia profissionais da área de saúde a ter um entendimento em tepo real sobre a severidade de surto de doenças.
+Aplicação de uma prova de conceito para avaliar a viabilidade de um sistema que auxlia profissionais da área de saúde a ter um entendimento em tepo real sobre a severidade de surto de Síndrome Respiratórira Aguda Grave (SRAG).
+
+# Tutorial para executar o projeto 
+
+[Clique aqui](https://www.youtube.com/watch?v=dRFvq--Vbew) para acessar o tutorial de execução do projeto
 
 # Como rodar o Agente de SRAG 
 
