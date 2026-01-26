@@ -12,11 +12,10 @@ handling missing values, and eliminating duplicates."""
 
     columns_important = [
         'DT_NOTIFIC', 'AVE_SUINO', 'FEBRE',
-        'TOSSE', 'GARGANTA', 'DISPNEIA', 'DESC_RESP',
-        'DIARREIA', 'VOMITO', 'FATOR_RISC',
+        'DISPNEIA', 'DESC_RESP','FATOR_RISC',
         'VACINA', 'ANTIVIRAL', 'TP_ANTIVIR', 'UTI',
-        'TP_AMOSTRA', 'EVOLUCAO', 'VACINA_COV',
-        'SURTO_SG', 'CO_DETEC'
+        'TP_AMOSTRA', 'EVOLUCAO',
+        'SURTO_SG'
     ]
 
     df_raw_important = df[columns_important]

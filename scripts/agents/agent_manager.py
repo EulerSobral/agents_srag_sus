@@ -10,7 +10,7 @@ from agent_internet import AgentInternet
 from langchain_core.prompts import PromptTemplate 
 
 from tools.tool_visualization import visualize_last_30_days, visualize_last_12_months
-
+from tools.metrics_calculator import MetricsCalculator
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -120,10 +120,13 @@ class Manager:
             "internet_results": "",
             "answer": ""
         }
+        
+        start_date = "2025-01-01"
+        end_date = "2025-12-31"
 
         final_state = self.graph.invoke(initial_state)
 
-       
+
         df_path = os.path.join(DATALAKE_DIR, "gold", "srag_2025_final_processed.csv")
         df = pd.read_csv(df_path, sep=";")
 
@@ -138,8 +141,13 @@ class Manager:
 
         logging.info("Generated visualizations for the last 30 days and last 12 months.")
 
-       
+        output_json = os.path.join(OUTPUT_DIR, "metrics_2025.json")    
+        MetricsCalculator(df_path, output_json)  
+
+        logging.info("Calculated metrics and saved to JSON file.")
+
         output_md = os.path.join(OUTPUT_DIR, "Output.md")
+    
         with open(output_md, "w") as f:
             f.write(str(final_state["answer"]))  
 

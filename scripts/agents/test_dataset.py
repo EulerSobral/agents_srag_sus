@@ -1,4 +1,5 @@
-import os
+import os  
+import logging
 import pandas as pd
 from dotenv import load_dotenv
 from langsmith import Client
