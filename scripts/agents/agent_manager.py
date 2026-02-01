@@ -11,6 +11,7 @@ from langchain_core.prompts import PromptTemplate
 
 from tools.tool_visualization import visualize_last_30_days, visualize_last_12_months
 from tools.metrics_calculator import MetricsCalculator
+from tools.unify_repo_tool import UnifyRepository
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -152,5 +153,11 @@ class Manager:
             f.write(str(final_state["answer"]))  
 
         logging.info("Final answer written to Output.md file.")
+
+        unified_md = os.path.join(OUTPUT_DIR, "unified_repo.md")
+        
+        UnifyRepository(output_md, output_json, file_30, file_12, output_md, output_json, unified_md)
+
+        logging.info("Unified repository files into unified_repo.md.")
 
         return final_state["answer"]

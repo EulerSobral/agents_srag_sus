@@ -183,15 +183,15 @@ class MetricsCalculator:
         previous_end_date = '2024-12-31' 
 
         metrics = { 
-            "antiviral_increase": self._calculate_metrics_antiviral(df, current_start_date, current_end_date) , 
-            "cases_ave_suino": self._calculate_metrics_ave_suino(df, current_start_date, current_end_date), 
-            "cases_febre": self._calculate_metrics_febre(df, current_start_date, current_end_date), 
-            "cases_dispneia": self._calculate_metrics_dispneia(df, current_start_date, current_end_date), 
-            "cases_fator_risc": self._calculate_metrics_fator_risc(df, current_start_date, current_end_date), 
-            "cases_vacina": self._calculate_metrics_vacina(df, current_start_date, current_end_date), 
-            "cases_uti": self._calculate_metrics_uti(df, current_start_date, current_end_date), 
-            "cases_evolucao": self._calculate_metrics_evolucao(df, current_start_date, current_end_date), 
-            "cases_surto_sg": self._calculate_metrics_surto_sg(df, current_start_date, current_end_date)
+            "uso antiviral": self._calculate_metrics_antiviral(df, current_start_date, current_end_date) , 
+            "casos de contato com aves e suinos": self._calculate_metrics_ave_suino(df, current_start_date, current_end_date), 
+            "casos de febre": self._calculate_metrics_febre(df, current_start_date, current_end_date), 
+            "casos de dispneia": self._calculate_metrics_dispneia(df, current_start_date, current_end_date), 
+            "Propoporção de pessosas em fator de risco": self._calculate_metrics_fator_risc(df, current_start_date, current_end_date), 
+            "Proporção de pessoas vacinadas": self._calculate_metrics_vacina(df, current_start_date, current_end_date), 
+            "Proporção de pacientes na UTI": self._calculate_metrics_uti(df, current_start_date, current_end_date), 
+            "evolução da doença": self._calculate_metrics_evolucao(df, current_start_date, current_end_date), 
+            "casos de surto sg": self._calculate_metrics_surto_sg(df, current_start_date, current_end_date)
         }   
 
         with open(output_path, 'w') as f: 
