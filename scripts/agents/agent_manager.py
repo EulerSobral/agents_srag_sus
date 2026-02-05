@@ -72,10 +72,7 @@ class Manager:
                 - medidas preventivas,
                 - recomendações de saúde pública.
 
-                Se a pergunta envolver antivirais:
-                - inclua dosagem, efeitos colaterais, interações medicamentosas
-                - e recomendações de baixo custo.
-
+                ================================
                 Informações recuperadas do banco de dados:
                 {retrived_docs}
 

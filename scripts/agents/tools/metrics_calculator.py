@@ -182,7 +182,8 @@ class MetricsCalculator:
         previous_start_date = '2024-01-01'
         previous_end_date = '2024-12-31' 
 
-        metrics = { 
+        metrics = {  
+            "Proporção de casos notificados": self._calculate_metrics_increase_date(df, current_start_date, current_end_date, previous_start_date, previous_end_date),
             "uso antiviral": self._calculate_metrics_antiviral(df, current_start_date, current_end_date) , 
             "casos de contato com aves e suinos": self._calculate_metrics_ave_suino(df, current_start_date, current_end_date), 
             "casos de febre": self._calculate_metrics_febre(df, current_start_date, current_end_date), 

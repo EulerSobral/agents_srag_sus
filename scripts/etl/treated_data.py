@@ -13,9 +13,7 @@ handling missing values, and eliminating duplicates."""
     columns_important = [
         'DT_NOTIFIC', 'AVE_SUINO', 'FEBRE',
         'DISPNEIA', 'DESC_RESP','FATOR_RISC',
-        'VACINA', 'ANTIVIRAL', 'TP_ANTIVIR', 'UTI',
-        'TP_AMOSTRA', 'EVOLUCAO',
-        'SURTO_SG'
+        'VACINA', 'ANTIVIRAL',  'UTI', 'EVOLUCAO','SURTO_SG'
     ]
 
     df_raw_important = df[columns_important]

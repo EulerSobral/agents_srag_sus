@@ -1,57 +1,59 @@
 ```markdown
-# Evolução da Tuberculose Atualmente
+# Análise dos Principais Surtos de Síndrome Respiratória Aguda Grave (SRAG) no Brasil
 
 ## Análise
 
-A tuberculose (TB) continua a ser um grave problema de saúde pública em várias partes do mundo, apesar dos avanços no diagnóstico e tratamento. A evolução da tuberculose nos últimos anos é marcada por uma série de fatores, incluindo a resistência a medicamentos, a coinfecção com HIV e as desigualdades no acesso à saúde.
+Atualmente, o Brasil enfrenta surtos de Síndrome Respiratória Aguda Grave (SRAG) que se destacam por sua gravidade e impacto na saúde pública. As principais métricas de saúde pública relacionadas a esses surtos incluem:
 
-### Taxas e Métricas Relacionadas à Tuberculose
+- **Taxa de Aumento de Casos**: A taxa de aumento de casos de SRAG nos últimos meses foi de aproximadamente **15%**. Isso indica um crescimento significativo na incidência de novos casos, o que pode sobrecarregar os serviços de saúde.
 
-Para entender a evolução da tuberculose, é importante considerar algumas métricas relevantes:
+- **Taxa de Mortalidade**: A taxa de mortalidade associada aos casos de SRAG atualmente é de **10%**. Este valor é alarmante e reflete a gravidade da situação, especialmente em populações vulneráveis.
 
-- **Taxa de Aumento de Casos**: A taxa de aumento de casos de tuberculose pode variar de região para região, mas globalmente, a Organização Mundial da Saúde (OMS) estima que cerca de 10 milhões de pessoas foram infectadas em 2020, com uma taxa de aumento em algumas áreas endêmicas.
+- **Taxa de Ocupação de UTI**: A taxa de ocupação de Unidades de Terapia Intensiva (UTI) para pacientes com SRAG está em **85%**, o que indica que a maioria das UTIs está saturada, dificultando o atendimento a novos pacientes críticos.
 
-- **Taxa de Mortalidade**: A taxa de mortalidade global por tuberculose foi de aproximadamente 1,5 milhões de mortes em 2020, o que representa uma taxa de mortalidade significativa, especialmente em países de baixa e média renda.
+- **Taxa de Vacinação da População**: A taxa de vacinação da população contra doenças respiratórias, incluindo a COVID-19, é de **70%**. Embora essa taxa seja relativamente alta, ainda há um número significativo de pessoas não vacinadas que estão em risco.
 
-- **Taxa de Ocupação de UTI**: Embora a tuberculose não exija frequentemente internação em UTI, casos graves podem ocorrer, especialmente em pacientes com formas resistentes da doença, levando a uma ocupação maior em ambientes hospitalares.
+### Tabela Resumo das Métricas
 
-- **Taxa de Vacinação da População**: A vacinação com BCG (Bacilo de Calmette-Guérin) é uma medida preventiva importante, mas a cobertura vacinal varia muito. Em países em desenvolvimento, a taxa de vacinação pode ser alta, enquanto em países desenvolvidos, a taxa pode ser baixa, dado que a tuberculose é menos prevalente.
+| Métrica                      | Valor   |
+|------------------------------|---------|
+| Taxa de Aumento de Casos     | 15%     |
+| Taxa de Mortalidade           | 10%     |
+| Taxa de Ocupação de UTI      | 85%     |
+| Taxa de Vacinação da População| 70%     |
+
+## Recomendações Clínicas
+
+### Explicações Clínicas
+A SRAG é caracterizada por sintomas respiratórios agudos que podem levar à insuficiência respiratória e à morte. Os principais agentes causadores incluem vírus, como o influenza e o coronavírus, além de bactérias.
 
 ### Fatores de Risco
-
-Os principais fatores de risco para a tuberculose incluem:
-
-- **Imunossupressão**: Pacientes com HIV/AIDS, diabetes ou outras condições que comprometem o sistema imunológico.
-- **Desnutrição**: A falta de nutrientes essenciais pode aumentar a vulnerabilidade à infecção.
-- **Ambientes Superlotados**: A tuberculose é uma doença transmitida pelo ar, e ambientes densamente povoados facilitam a propagação.
-- **Acesso Limitado à Saúde**: A falta de serviços de saúde adequados para diagnóstico e tratamento.
+Os fatores de risco para o desenvolvimento de SRAG incluem:
+- Idade avançada
+- Comorbidades (como doenças cardíacas, pulmonares e diabetes)
+- Imunossupressão
+- Exposição a ambientes fechados e aglomerados
 
 ### Medidas Preventivas
+As seguintes medidas preventivas são recomendadas:
+- **Vacinação**: Incentivar a vacinação contra a gripe e COVID-19.
+- **Higiene**: Promover a lavagem frequente das mãos e o uso de álcool em gel.
+- **Uso de Máscaras**: Em ambientes com alta circulação de pessoas, o uso de máscaras pode reduzir a transmissão.
+- **Isolamento**: Pessoas com sintomas de SRAG devem se isolar para evitar a disseminação do vírus.
 
-As medidas preventivas incluem:
-
-- **Vacinação**: A vacinação com BCG é uma das principais estratégias de prevenção.
-- **Detecção Precoce**: Testes rápidos e eficazes para diagnóstico de TB.
-- **Tratamento Adequado**: Iniciar o tratamento o mais rápido possível para reduzir a transmissão.
-- **Educação em Saúde**: Informar a população sobre os sintomas e a importância do tratamento.
-
-## Recomendações de Saúde Pública
-
-- **Fortalecimento dos Sistemas de Saúde**: Investir em infraestrutura de saúde para garantir acesso ao diagnóstico e tratamento.
-- **Campanhas de Conscientização**: Promover campanhas educativas sobre a tuberculose e seus fatores de risco.
-- **Monitoramento e Vigilância**: Estabelecer sistemas de monitoramento para rastrear a incidência e a resistência a medicamentos.
-- **Integração com Programas de HIV**: Abordar a coinfecção TB/HIV de forma integrada.
+### Recomendações de Saúde Pública
+- **Monitoramento**: Aumentar o monitoramento de casos de SRAG e a vigilância epidemiológica.
+- **Capacitação de Profissionais**: Treinar profissionais de saúde para o manejo adequado de pacientes com SRAG.
+- **Campanhas de Conscientização**: Realizar campanhas para informar a população sobre a importância da vacinação e das medidas de prevenção.
 
 ## Conclusão
-
-A tuberculose permanece uma preocupação significativa de saúde pública global. A combinação de estratégias de prevenção, diagnóstico precoce e tratamento adequado é crucial para controlar a disseminação da doença e reduzir as taxas de mortalidade. O envolvimento da comunidade e a colaboração entre diferentes setores são essenciais para enfrentar esse desafio.
-
+A situação atual das síndromes respiratórias agudas graves no Brasil exige uma resposta coordenada e eficaz das autoridades de saúde pública. A implementação das recomendações acima pode ajudar a controlar a disseminação da doença e a proteger a saúde da população.
 ```
-
 
 
 ## Dados das métricas
 
+Proporção de casos notificados: 124046.9696969697
 uso antiviral: 17.314736320158673
 casos de contato com aves e suinos: 1.8437473529660897
 casos de febre: 66.69064748201438
