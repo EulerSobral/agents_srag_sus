@@ -61,7 +61,7 @@ class UnifyRepository:
 
                     items = list(data.items())
 
-                    # Collect numeric values to normalize bars (ignore non-numeric)
+                
                     numeric_values = []
                     for _, v in items:
                         try:
@@ -72,35 +72,26 @@ class UnifyRepository:
                     max_val = max(numeric_values) if numeric_values else 1.0
 
                     lines = []
-                    lines.append("| Métrica | Valor | Visual |")
-                    lines.append("|---|---:|---|")
+                    lines.append("| Métrica | Valor |")
+                    lines.append("|---|---:|")
 
                     for key, value in items:
                         formatted = str(value)
-                        visual = "-"
+                
                         try:
                             val = float(value)
-                            # Format with thousands separator and two decimals
+                            
                             if "propor" in key.lower() and val <= 100:
-                                # likely a percentage - show with 2 decimals and % sign
+                            
                                 formatted = f"{val:.2f}%"
                             else:
                                 formatted = f"{val:,.2f}"
-
-                            # Build a simple horizontal bar (max width 30)
-                            width = 30
-                            bar_len = int((val / max_val) * width) if max_val > 0 else 0
-                            bar_len = max(0, min(width, bar_len))
-                            bar = "█" * bar_len + "░" * (width - bar_len)
-                            visual = bar
                         except Exception:
                             formatted = str(value)
-                            visual = "-"
-
-                        # Escape pipe characters in key/value to avoid breaking the table
+                        
                         safe_key = str(key).replace("|", "\\|")
                         safe_value = str(formatted).replace("|", "\\|")
-                        lines.append(f"| {safe_key} | {safe_value} | {visual} |")
+                        lines.append(f"| {safe_key} | {safe_value} |")
 
                     return "\n".join(lines)
                 else:
