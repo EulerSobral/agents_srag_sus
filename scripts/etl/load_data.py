@@ -42,7 +42,7 @@ It also converts the date column to the YYYY-MM-DD format.
 
     columns_yes_no = [
         'FEBRE', 'DISPNEIA', 'DESC_RESP',
-        'FATOR_RISC', 'VACINA', 'ANTIVIRAL', 'UTI', 'VACINA_COV', 'SURTO_SG',
+        'FATOR_RISC', 'VACINA', 'ANTIVIRAL', 'UTI', 'SURTO_SG'
     ]
 
     df_treated = df.copy()
