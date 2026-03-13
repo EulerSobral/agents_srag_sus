@@ -18,8 +18,7 @@ os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 client = Client()
 
 
-CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 GOLD_PATH = os.path.join(PROJECT_ROOT, "datalake", "gold", "srag_2025_final_processed.csv")
 
 

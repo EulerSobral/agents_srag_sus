@@ -33,4 +33,4 @@ class AgentInternet():
                 f"Fetched one single string result from internet: {formatted}"
             )
 
-        return formatted
+        return {"internet_results": formatted}

@@ -1,5 +1,6 @@
 import os  
 import logging
+import json
 import pandas as pd
 
 from typing import TypedDict, List 
@@ -13,18 +14,17 @@ from tools.tool_visualization import visualize_last_30_days, visualize_last_12_m
 from tools.metrics_calculator import MetricsCalculator
 from tools.unify_repo_tool import UnifyRepository
 
-CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_DIR)))
-
-DATALAKE_DIR = os.path.join(PROJECT_ROOT, "projeto_srag_agents","datalake")
-OUTPUT_DIR = os.path.join(PROJECT_ROOT, "projeto_srag_agents","output")
+DATALAKE_DIR = os.path.join(PROJECT_ROOT, "datalake")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
 
 
-class ManagerState(TypedDict):
+class ManagerState(TypedDict, total=False):
     question: str 
     retrived_docs: str 
     internet_results: str
+    metrics: str
     answer: str
 
 
@@ -47,7 +47,7 @@ class Manager:
         graph.add_node("answer", self.answer_node)  
 
         graph.set_entry_point("retrieve")
-        graph.add_edge("retrieve", "answer") 
+        graph.add_edge("retrieve", "internet")
         graph.add_edge("internet", "answer")
         graph.set_finish_point("answer") 
         
@@ -58,15 +58,23 @@ class Manager:
     def answer_node(self, state: ManagerState) -> ManagerState:
         prompt_template = """Você é um agente especialista em saúde pública e síndromes respiratórias agudas graves (SRAG).
                 Use as informações recuperadas da base de dados (RAG) e da Internet para responder à pergunta do usuário
-                de forma completa e precisa.
+                de forma completa e precisa. Também inclua as métricas no contexto da resposta, explicando o significado de cada métrica e suas implicações para a Síndrome Respiratória Aguda Grave (SRAG).
                 
                 Você deve mostrar os valores, comentar e analisar as seguintes métricas disponíveis na base de dados: 
                 - taxa de aumento de casos, mostre o valor da taxa de aumento de casos
                 - taxa de mortalidade, mostre o valor da taxa de mortalidade
                 - taxa de ocupação de UTI, , mostre o valor da taxa de UTI
-                - taxa de vacinação da população, , mostre o valor da taxa de vacinação da população
-
-                Se a pergunta for relacionada a doenças respiratórias, sempre inclua:
+                - taxa de vacinação da população, , mostre o valor da taxa de vacinação da população 
+                - taxa de pessoas em grupos de risco, mostre o valor da taxa de vacinação de grupos de risco
+                - taxa de pessoas com  contato com aves e suinos, mostre o valor da taxa de pessoas com contato com aves e suinos 
+                - taxa de pessoas com febre, mostre o valor da taxa de pessoas com febre 
+                - taxa de evolução do quado da doença, mostre o valor da taxa de evolução do quadro da doença 
+                - taxa de pessoas com sintomas respiratórios, mostre o valor da taxa de pessoas com sintomas respiratórios
+                - taxa de pessoas com dispneia, mostre o valor da taxa de pessoas com dispneia 
+                - taxa de surtos de SG, mostre o valor da taxa de surtos de SG 
+                - taxa da utilização de antivirais, mostre o valor da taxa de utilização de antivirais
+                
+               É necessário que você sempre inclua:
                 - explicações clínicas,
                 - fatores de risco,
                 - medidas preventivas,
@@ -76,6 +84,10 @@ class Manager:
                 Informações recuperadas do banco de dados:
                 {retrived_docs}
 
+                Informações das metrícas: 
+                {metrics}
+
+                ================================
                 Informações recuperadas da Internet:
                 {internet_results}
 
@@ -95,14 +107,15 @@ class Manager:
               Gere um arquivo do tipo md detalhado como resposta final à pergunta do usuário.
         """    
         prompt = PromptTemplate(
-            input_variables=["question", "retrived_docs", "internet_results"],
+            input_variables=["question", "retrived_docs", "internet_results", "metrics"],
             template=prompt_template
         )
 
         prompt_filled = prompt.format(
             question=state["question"],
             retrived_docs="\n".join(state["retrived_docs"]),
-            internet_results=state.get("internet_results","")
+            internet_results=state.get("internet_results",""),
+            metrics=state.get("metrics","")
         )
 
         response = self.llm.invoke(prompt_filled)
@@ -112,20 +125,31 @@ class Manager:
         return {**state, "answer": response.content}  
     
     def run_agent(self, question: str) -> str:
+        
+        df_path = os.path.join(DATALAKE_DIR, "gold", "srag_2025_final_processed.csv")
+        output_json = os.path.join(OUTPUT_DIR, "metrics_2025.json")
+        
+        MetricsCalculator(df_path, output_json)  
+
+        logging.info("Calculated metrics and saved to JSON file.")
+
+        try:
+            with open(output_json, "r") as f:
+                metrics_data = json.load(f)
+            metrics_str = json.dumps(metrics_data, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logging.error(f"Error loading metrics: {e}")
+            metrics_str = ""
+
         initial_state: ManagerState = {
             "question": question,
-            "retrived_docs": "",
-            "internet_results": "",
+            "retrived_docs": [],
+            "metrics": metrics_str,
             "answer": ""
         }
         
-        start_date = "2025-01-01"
-        end_date = "2025-12-31"
-
         final_state = self.graph.invoke(initial_state)
 
-
-        df_path = os.path.join(DATALAKE_DIR, "gold", "srag_2025_final_processed.csv")
         df = pd.read_csv(df_path, sep=";")
 
     
@@ -139,10 +163,6 @@ class Manager:
 
         logging.info("Generated visualizations for the last 30 days and last 12 months.")
 
-        output_json = os.path.join(OUTPUT_DIR, "metrics_2025.json")    
-        MetricsCalculator(df_path, output_json)  
-
-        logging.info("Calculated metrics and saved to JSON file.")
 
         output_md = os.path.join(OUTPUT_DIR, "Output.md")
     

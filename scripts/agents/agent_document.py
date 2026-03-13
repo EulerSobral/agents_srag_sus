@@ -32,10 +32,9 @@ class AgentDocument:
         except NameError:
             current_dir = os.getcwd()
 
-        project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
+        project_root = os.path.dirname(os.path.dirname(current_dir))
 
-
-        gold_dir = os.path.join(project_root, "projeto_srag_agents","datalake", "gold")
+        gold_dir = os.path.join(project_root, "datalake", "gold")
 
         self.path = os.path.join(gold_dir, path_pattern)
 

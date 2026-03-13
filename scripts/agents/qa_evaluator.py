@@ -1,9 +1,9 @@
 import logging
 import os
 from dotenv import load_dotenv
-
+from openai import OpenAI
 from langsmith import Client, traceable
-from langsmith.evaluation import RunEvaluator
+from langsmith.evaluation import RunEvaluator, EvaluationResult
 from langchain_core.prompts import PromptTemplate
 
 load_dotenv()
@@ -18,23 +18,34 @@ class QAEvalUniversal(RunEvaluator):
         self.prompt = prompt
 
     def evaluate(self, run, example):
+        try:
+            input_text = example.inputs["input"]
+            reference = example.outputs["output"]
+            prediction = run.outputs["output"]
 
-        input_text = example.inputs["input"]
-        reference = example.outputs["output"]
-        prediction = run.outputs["output"]
+            formatted_prompt = self.prompt.format(
+                input=input_text,
+                reference=reference,
+                prediction=prediction,
+            ) 
+            
+            llm = OpenAI()
+            response = llm.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": formatted_prompt}]
+            )
+            judge_output = response.choices[0].message.content
 
-        formatted_prompt = self.prompt.format(
-            input=input_text,
-            reference=reference,
-            prediction=prediction,
-        ) 
-        
-        from openai import OpenAI
-        llm = OpenAI()
+            if judge_output:
+                parts = judge_output.strip().split(" ", 1)
+                label = parts[0].upper()
+                comment = parts[1] if len(parts) > 1 else ""
+                score = 1 if label == "CORRECT" else 0
+            else:
+                score = 0
+                comment = "No response from evaluator"
 
-        judge_output = llm.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": formatted_prompt}]
-        ).choices[0].message.content
-
-        return {"score": judge_output}
+            return [EvaluationResult(key="qa_eval", score=score, comment=comment)]
+        except Exception as e:
+            logging.error(f"Error in evaluate: {e}")
+            return [EvaluationResult(key="qa_eval", score=0, comment=f"Error: {str(e)}")]
