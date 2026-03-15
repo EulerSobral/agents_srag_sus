@@ -5,7 +5,7 @@ import pandas as pd
 
 from typing import TypedDict, List 
 from langchain_openai import ChatOpenAI 
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph, END
 from agent_document import AgentDocument
 from agent_internet import AgentInternet 
 from langchain_core.prompts import PromptTemplate 
@@ -22,10 +22,11 @@ OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
 
 class ManagerState(TypedDict, total=False):
     question: str 
-    retrived_docs: str 
+    retrived_docs: list 
     internet_results: str
     metrics: str
-    answer: str
+    answer: str   
+    is_valid_input: bool
 
 
 class Manager: 
@@ -37,24 +38,89 @@ class Manager:
         self.agent_document = AgentDocument(path)
         self.agent_internet = AgentInternet(3) 
         self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.5) 
-        self.graph = self.build_graph() 
+        self.graph = self.build_graph()   
+
+    def valuation_input(self, state: ManagerState) -> ManagerState:
+        question = state["question"].lower()
+        prompt_guardail = f"""Você é o auditor de um sistema especializado em Síndrome Respiratória Aguda Grave (SRAG), dados epidemiológicos e saúde pública.
+        
+        Sua tarefa é avaliar se a pergunta do usuário tem alguma chance de estar relacionada ao seu banco de dados ou a análises de métricas em geral.
+        
+        REGRAS IMPORTANTES:
+        1. Se a pergunta for sobre saúde, doenças, vacinas ou SRAG, é VÁLIDA.
+        2. Se a pergunta for genérica sobre estatísticas, dados, gráficos, tabelas ou taxas (ex: "mostre os dados", "qual o percentual?"), considere VÁLIDA, pois assumimos que o usuário está se referindo à base de dados médica do sistema.
+        3. Só bloqueie se for CLARAMENTE sobre um assunto aleatório (esportes, culinária, entretenimento, etc).
+        
+        Exemplos de VÁLIDAS (Responda SIM):
+        - "Quais os sintomas da SRAG?" (Motivo: Saúde explícita) 
+        - "Essa SRAG é causada por vírus ou bactérias?" (Motivo: Doenças explícita) 
+        - "Essa SRAG está relacionada à gripe?" (Motivo: SRAG explícita)
+        - "Qual a taxa de mortalidade?" (Motivo: Pergunta de dados, relacionada à base)
+        - "Quero ver os gráficos do último mês." (Motivo: Comando de visualização de dados)
+        - "Resuma as informações que você tem." (Motivo: Interação normal com o agente)
+        
+        Exemplos de INVÁLIDAS (Responda NAO):
+        - "Como fazer um bolo de chocolate?" (Motivo: Culinária)
+        - "Quem ganhou o campeonato brasileiro?" (Motivo: Esportes)
+        - "Escreva um poema sobre flores." (Motivo: Entretenimento aleatório)
+        
+        Pergunta do usuário: "{question}"
+        
+        Responda APENAS com a palavra SIM ou NAO.
+        """
+        llm_guardrail = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+        response = llm_guardrail.invoke(prompt_guardail).content.strip().upper()
+        
+        is_valid = "SIM" in response   
+        
+        logging.info(f"Guardrail avaliou a pergunta como: {'Válida' if is_valid else 'Inválida'}")
+        
+        return {**state, "is_valid_topic": is_valid}
+    
+    def route_after_guardrail(self, state: ManagerState) -> str:
+        """Roteia para a recuperação de dados se válido, ou rejeita se inválido."""
+        if state.get("is_valid_input", True):
+            return "retrieve"
+        return "reject"  
+
+    def reject_node(self, state: ManagerState) -> ManagerState:
+        """Gera uma resposta padrão para perguntas fora do escopo."""
+        reject_message = "Desculpe, meu escopo de atuação é limitado a responder perguntas sobre saúde pública e Síndromes Respiratórias Agudas Graves (SRAG). Como posso ajudar com esses temas?"
+        logging.info("Pergunta rejeitada pelo guardrail.")
+        
+        return {**state, "answer": reject_message}
 
     def build_graph(self) -> StateGraph:  
         graph = StateGraph(ManagerState) 
 
+        graph.add_node("guardrail", self.valuation_input) # NOVO
+        graph.add_node("reject", self.reject_node)             # NOVO
         graph.add_node("retrieve", self.agent_document.create_new_state) 
         graph.add_node("internet", self.agent_internet.fetch_information)
         graph.add_node("answer", self.answer_node)  
 
-        graph.set_entry_point("retrieve")
+
+        graph.set_entry_point("guardrail")
+
+        graph.add_conditional_edges(
+            "guardrail", 
+            self.route_after_guardrail, 
+            {
+                "retrieve": "retrieve", 
+                "reject": "reject"      
+            }
+        )
+
+        graph.add_edge("reject", END)
+
         graph.add_edge("retrieve", "internet")
         graph.add_edge("internet", "answer")
-        graph.set_finish_point("answer") 
+        graph.add_edge("answer", END) #
         
-        logging.info("Manager graph built successfully with nodes: retrieve, internet, answer.")
+        logging.info("Manager graph built successfully with nodes: guardrail, reject, retrieve, internet, answer.")
 
-        return graph.compile() 
-
+        return graph.compile()
+  
     def answer_node(self, state: ManagerState) -> ManagerState:
         prompt_template = """Você é um agente especialista em saúde pública e síndromes respiratórias agudas graves (SRAG).
                 Use as informações recuperadas da base de dados (RAG) e da Internet para responder à pergunta do usuário
@@ -115,7 +181,7 @@ class Manager:
             question=state["question"],
             retrived_docs="\n".join(state["retrived_docs"]),
             internet_results=state.get("internet_results",""),
-            metrics=state.get("metrics","")
+            metrics=state.get("metrics",""), 
         )
 
         response = self.llm.invoke(prompt_filled)
@@ -145,7 +211,8 @@ class Manager:
             "question": question,
             "retrived_docs": [],
             "metrics": metrics_str,
-            "answer": ""
+            "answer": "", 
+            "is_valid_input": self.valuation_input({"question": question}).get("is_valid_topic")
         }
         
         final_state = self.graph.invoke(initial_state)
