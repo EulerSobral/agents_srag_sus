@@ -5,7 +5,7 @@ import pandas as pd
 from typing import TypedDict, List
 from dotenv import load_dotenv
 
-from langchain_community.embeddings import OpenAIEmbeddings  
+from langchain_openai import OpenAIEmbeddings  
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 
@@ -54,10 +54,9 @@ class AgentDocument:
         df = df.head(10)
 
         columns_from_doc = [
-            "NU_IDADE_N", "CS_GESTANT", "AVE_SUINO", "FEBRE", "TOSSE", "GARGANTA",
-            "DISPNEIA", "DESC_RESP", "DIARREIA", "VOMITO", "FATOR_RISC",
-            "VACINA", "ANTIVIRAL", "TP_ANTIVIR", "UTI", "TP_AMOSTRA",
-            "EVOLUCAO", "VACINA_COV", "SURTO_SG", "CO_DETEC"
+            "DT_NOTIFIC", "AVE_SUINO", "FEBRE", "DISPNEIA",
+            "DESC_RESP", "FATOR_RISC", "VACINA", "ANTIVIRAL",
+            "UTI", "EVOLUCAO", "SURTO_SG"
         ]
 
         docs = []

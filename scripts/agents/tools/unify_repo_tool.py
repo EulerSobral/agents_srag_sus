@@ -49,55 +49,61 @@ class UnifyRepository:
             logging.error(f"Error initializing UnifyRepository: {e}")
             raise e
 
+    def _read_with_encoding(self, file_path: str, is_json: bool, encoding: str) -> str:
+        with open(file_path, "r", encoding=encoding) as f:
+            if is_json:
+                data = json.load(f)
+                logging.info(f"Loaded JSON data from {file_path} using {encoding}")
+
+                items = list(data.items())
+
+                numeric_values = []
+                for _, v in items:
+                    try:
+                        numeric_values.append(float(v))
+                    except Exception:
+                        continue
+
+                max_val = max(numeric_values) if numeric_values else 1.0
+
+                lines = []
+                lines.append("| Métrica | Valor |")
+                lines.append("|---|---:|")
+
+                for key, value in items:
+                    formatted = str(value)
+            
+                    try:
+                        val = float(value)
+                        
+                        if "propor" in key.lower() and val <= 100:
+                        
+                            formatted = f"{val:.2f}%"
+                        else:
+                            formatted = f"{val:,.2f}"
+                    except Exception:
+                        formatted = str(value)
+                    
+                    safe_key = str(key).replace("|", "\\|")
+                    safe_value = str(formatted).replace("|", "\\|")
+                    lines.append(f"| {safe_key} | {safe_value} |")
+
+                return "\n".join(lines)
+            else:
+                content = f.read()
+                logging.info(f"Loaded text data from {file_path} using {encoding}")
+                return content
+
     def _load_data_file(self, file_path: str, is_json: bool) -> str:
         """
-        Get the content of a data file, either JSON or plain text.
+        Get the content of a data file, trying utf-8 first and falling back to latin-1.
         """
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                if is_json:
-                    data = json.load(f)
-                    logging.info(f"Loaded JSON data from {file_path}")
-
-                    items = list(data.items())
-
-                
-                    numeric_values = []
-                    for _, v in items:
-                        try:
-                            numeric_values.append(float(v))
-                        except Exception:
-                            continue
-
-                    max_val = max(numeric_values) if numeric_values else 1.0
-
-                    lines = []
-                    lines.append("| Métrica | Valor |")
-                    lines.append("|---|---:|")
-
-                    for key, value in items:
-                        formatted = str(value)
-                
-                        try:
-                            val = float(value)
-                            
-                            if "propor" in key.lower() and val <= 100:
-                            
-                                formatted = f"{val:.2f}%"
-                            else:
-                                formatted = f"{val:,.2f}"
-                        except Exception:
-                            formatted = str(value)
-                        
-                        safe_key = str(key).replace("|", "\\|")
-                        safe_value = str(formatted).replace("|", "\\|")
-                        lines.append(f"| {safe_key} | {safe_value} |")
-
-                    return "\n".join(lines)
-                else:
-                    content = f.read()
-                    logging.info(f"Loaded text data from {file_path}")
-                    return content
+            try:
+                return self._read_with_encoding(file_path, is_json, encoding="utf-8")
+            except (UnicodeDecodeError, UnicodeError):
+                logging.warning(f"UTF-8 decoding failed for {file_path}, falling back to latin-1")
+                return self._read_with_encoding(file_path, is_json, encoding="latin-1")
         except Exception as e:
             logging.error(f"Error loading data from {file_path}: {e}")
             raise e
