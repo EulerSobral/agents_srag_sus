@@ -2,7 +2,7 @@
 
 ## Visão Geral do Projeto
 
-**SRAG Agents** é uma prova de conceito que implementa um sistema multi-agente com IA generativa para auxiliar profissionais da área de saúde a compreender em tempo real a severidade de surtos de **Síndrome Respiratória Aguda Grave (SRAG)** em pacientes.
+Esta prova de conceito que implementa um sistema multi-agente que utiliza LLM e visualização de dados  para auxiliar profissionais da área de saúde a compreender em tempo real a severidade de surtos de **Síndrome Respiratória Aguda Grave (SRAG)** em pacientes.
 
 ### Objetivo Principal
 Disponibilizar análises inteligentes e baseadas em dados sobre a evolução de casos de SRAG, permitindo que profissionais de saúde tomem decisões informadas e rápidas durante crises respiratórias.
