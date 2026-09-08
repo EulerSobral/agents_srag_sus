@@ -27,15 +27,32 @@ class MetricsCalculator:
             raise e  
 
 
-    def _calculate_metrics_increase_date(self, df, current_start_date, current_end_date, previous_start_date, previous_end_date) -> float: 
+    def _calculate_metrics_increase_date(self, df, current_start_date=None, current_end_date=None, previous_start_date=None, previous_end_date=None) -> float: 
         """ 
         Calculate the percentage of case increase between two date ranges.
+        By default, compares the last 30 days against the preceding 30 days based on max date in data.
         """   
-        current_event_cases = df[(df['DT_NOTIFIC'] >= current_start_date) & (df['DT_NOTIFIC'] <= current_end_date)].shape[0] 
-        previous_event_cases = df[(df['DT_NOTIFIC'] >= previous_start_date) & (df['DT_NOTIFIC'] <= previous_end_date)].shape[0] 
+        valid_df = df[df['DT_NOTIFIC'].notna()]
+        if valid_df.empty:
+            return 0.0
+
+        if current_end_date is None or current_start_date is None:
+            max_date = valid_df['DT_NOTIFIC'].max()
+            current_end_date = max_date
+            current_start_date = max_date - pd.Timedelta(days=30)
+            previous_end_date = current_start_date
+            previous_start_date = current_start_date - pd.Timedelta(days=30)
+        else:
+            current_start_date = pd.to_datetime(current_start_date)
+            current_end_date = pd.to_datetime(current_end_date)
+            previous_start_date = pd.to_datetime(previous_start_date)
+            previous_end_date = pd.to_datetime(previous_end_date)
+
+        current_event_cases = valid_df[(valid_df['DT_NOTIFIC'] > current_start_date) & (valid_df['DT_NOTIFIC'] <= current_end_date)].shape[0] 
+        previous_event_cases = valid_df[(valid_df['DT_NOTIFIC'] > previous_start_date) & (valid_df['DT_NOTIFIC'] <= previous_end_date)].shape[0] 
         
         if previous_event_cases == 0: 
-            return 0 
+            return 0.0 
 
         return ((current_event_cases - previous_event_cases) / previous_event_cases) * 100
 
@@ -173,29 +190,32 @@ class MetricsCalculator:
         return percentage 
     
 
-    def save_metrics_to_json(self, df,output_path: str): 
+    def save_metrics_to_json(self, df, output_path: str): 
         """ 
         Save calculated metrics to a JSON file.
         """    
-        current_start_date = '2025-01-01'
-        current_end_date = '2025-12-31' 
-        previous_start_date = '2024-01-01'
-        previous_end_date = '2024-12-31' 
+        valid_dates = df['DT_NOTIFIC'].dropna()
+        if not valid_dates.empty:
+            start_date = valid_dates.min()
+            end_date = valid_dates.max()
+        else:
+            start_date = pd.to_datetime('2025-01-01')
+            end_date = pd.to_datetime('2025-12-31')
 
         metrics = {  
-            "Proporção de casos notificados": self._calculate_metrics_increase_date(df, current_start_date, current_end_date, previous_start_date, previous_end_date),
-            "uso antiviral": self._calculate_metrics_antiviral(df, current_start_date, current_end_date) , 
-            "casos de contato com aves e suinos": self._calculate_metrics_ave_suino(df, current_start_date, current_end_date), 
-            "casos de febre": self._calculate_metrics_febre(df, current_start_date, current_end_date), 
-            "casos de dispneia": self._calculate_metrics_dispneia(df, current_start_date, current_end_date), 
-            "Propoporção de pessosas em fator de risco": self._calculate_metrics_fator_risc(df, current_start_date, current_end_date), 
-            "Proporção de pessoas vacinadas": self._calculate_metrics_vacina(df, current_start_date, current_end_date), 
-            "Proporção de pacientes na UTI": self._calculate_metrics_uti(df, current_start_date, current_end_date), 
-            "evolução da doença": self._calculate_metrics_evolucao(df, current_start_date, current_end_date), 
-            "casos de surto sg": self._calculate_metrics_surto_sg(df, current_start_date, current_end_date)
+            "Proporção de casos notificados": self._calculate_metrics_increase_date(df),
+            "uso antiviral": self._calculate_metrics_antiviral(df, start_date, end_date), 
+            "casos de contato com aves e suinos": self._calculate_metrics_ave_suino(df, start_date, end_date), 
+            "casos de febre": self._calculate_metrics_febre(df, start_date, end_date), 
+            "casos de dispneia": self._calculate_metrics_dispneia(df, start_date, end_date), 
+            "Proporção de pessoas em fator de risco": self._calculate_metrics_fator_risc(df, start_date, end_date), 
+            "Proporção de pessoas vacinadas": self._calculate_metrics_vacina(df, start_date, end_date), 
+            "Proporção de pacientes na UTI": self._calculate_metrics_uti(df, start_date, end_date), 
+            "evolução da doença": self._calculate_metrics_evolucao(df, start_date, end_date), 
+            "casos de surto sg": self._calculate_metrics_surto_sg(df, start_date, end_date)
         }   
 
-        with open(output_path, 'w') as f: 
-            json.dump(metrics, f, indent=4) 
+        with open(output_path, 'w', encoding='utf-8') as f: 
+            json.dump(metrics, f, indent=4, ensure_ascii=False) 
 
         logging.info(f"Metrics saved to {output_path}.")  

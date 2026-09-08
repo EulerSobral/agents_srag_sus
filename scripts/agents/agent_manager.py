@@ -2,6 +2,7 @@ import os
 import logging
 import json
 import pandas as pd
+import sys
 
 from typing import TypedDict, List 
 from langchain_openai import ChatOpenAI 
@@ -13,6 +14,12 @@ from langchain_core.prompts import PromptTemplate
 from tools.tool_visualization import visualize_last_30_days, visualize_last_12_months
 from tools.metrics_calculator import MetricsCalculator
 from tools.unify_repo_tool import UnifyRepository
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+from logger_config import setup_logger
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -39,6 +46,8 @@ class Manager:
     """
 
     def __init__(self, path):
+        setup_logger()
+        logging.info("[GOVERNANÇA] Inicializando Gerente de Agentes SRAG...")
         self.agent_document = AgentDocument(path)
         self.agent_internet = AgentInternet(3) 
         self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.5) 
@@ -46,6 +55,8 @@ class Manager:
 
     def valuation_input(self, state: ManagerState) -> ManagerState:
         question = state["question"].lower()
+        logging.info(f"[GOVERNANÇA - ENTRADA] Iniciando validação por Guardrail da pergunta: '{question}'")
+        
         prompt_guardail = f"""Você é o auditor de um sistema especializado em Síndrome Respiratória Aguda Grave (SRAG) e dados epidemiológicos.
         
         Sua tarefa é avaliar se a pergunta do usuário tem alguma chance de estar relacionada ao seu banco de dados ou a análises de métricas em geral.
@@ -77,22 +88,24 @@ class Manager:
         
         is_valid = "SIM" in response   
         
-        logging.info(f"Guardrail avaliou a pergunta como: {'Válida' if is_valid else 'Inválida'}")
+        logging.info(f"[GOVERNANÇA - AUDITORIA ENTRADA] Guardrail avaliou a pergunta como: {'APROVADA (Válida)' if is_valid else 'BLOQUEADA (Inválida)'}")
         
         return {**state, "is_valid_input": is_valid}
 
     def valuation_output(self, state: ManagerState) -> ManagerState: 
-        """Avalia se a resposta gerada pelo agente está dentro do escopo de saúde pública e  Síndrome Respiratória Aguda Grave (SRAG)."""
+        """Avalia se a resposta gerada pelo agente está dentro do escopo de saúde pública e Síndrome Respiratória Aguda Grave (SRAG)."""
         answer = state.get("answer", "").lower()
+        logging.info("[GOVERNANÇA - SAÍDA] Iniciando validação por Guardrail da resposta gerada.")
+        
         prompt_guardail = f"""Você é o auditor de um sistema especializado em Síndrome Respiratória Aguda Grave (SRAG) e dados epidemiológicos.
         
-        Sua tarefa é avaliar se a resposta gerada pelo agente está dentro do escopo de saúde pública e  Síndrome Respiratória Aguda Grave (SRAG).
+        Sua tarefa é avaliar se a resposta gerada pelo agente está dentro do escopo de saúde pública e Síndrome Respiratória Aguda Grave (SRAG).
         
         REGRAS IMPORTANTES:
         1. Se a resposta for sobre saúde, doenças e vacinas que sejam relevantes para o escopo de Síndrome Respiratória Aguda Grave (SRAG), é VÁLIDA.
         2. Se a resposta for genérica sobre estatísticas, dados, gráficos, tabelas ou taxas (ex: "mostre os dados", "qual o percentual?"), considere VÁLIDA, pois assumimos que o usuário está se referindo à base de dados médica do sistema.
         3. Só bloqueie se for CLARAMENTE sobre um assunto aleatório (esportes, culinária, entretenimento, etc).
-        4. Verifique também se a resposta contém informações incorretas ou enganosas sobre saúde pública e  Síndrome Respiratória Aguda Grave (SRAG). Se houver informações incorretas, considere a resposta INVÁLIDA.
+        4. Verifique também se a resposta contém informações incorretas ou enganosas sobre saúde pública e Síndrome Respiratória Aguda Grave (SRAG). Se houver informações incorretas, considere a resposta INVÁLIDA.
 
         Resposta do agente: "{answer}"
         
@@ -103,7 +116,7 @@ class Manager:
         
         is_valid = "SIM" in response   
         
-        logging.info(f"Guardrail avaliou a resposta como: {'Válida' if is_valid else 'Inválida'}")
+        logging.info(f"[GOVERNANÇA - AUDITORIA SAÍDA] Guardrail avaliou a resposta como: {'APROVADA (Válida)' if is_valid else 'BLOQUEADA (Inválida)'}")
         
         return {**state, "is_valid_output": is_valid}
    
@@ -111,7 +124,7 @@ class Manager:
         """Gera uma resposta padrão para perguntas fora do escopo.""" 
 
         reject_message = "Desculpe, meu escopo de atuação é limitado a responder perguntas sobre Síndromes Respiratórias Agudas Graves (SRAG)"
-        logging.info("Pergunta rejeitada pelo guardrail.")
+        logging.warning("[GOVERNANÇA - BLOQUEIO] Pergunta rejeitada pelo guardrail de integridade de escopo.")
         
         return {**state, "answer": reject_message}
 
@@ -121,15 +134,16 @@ class Manager:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         output_json = os.path.join(OUTPUT_DIR, "metrics_2025.json")
 
+        logging.info(f"[GOVERNANÇA - MÉTRICAS] Calculando estatísticas epidemiológicas a partir de {df_path}")
         MetricsCalculator(df_path, output_json)
-        logging.info("Calculated metrics and saved to JSON file.")
 
         try:
             with open(output_json, "r", encoding="utf-8") as f:
                 metrics_data = json.load(f)
             metrics_str = json.dumps(metrics_data, indent=2, ensure_ascii=False)
+            logging.info(f"[GOVERNANÇA - MÉTRICAS] Métricas epidemiológicas salvas com sucesso em JSON: {output_json}")
         except Exception as e:
-            logging.error(f"Error loading metrics: {e}")
+            logging.error(f"[GOVERNANÇA - MÉTRICAS] Erro ao carregar arquivo de métricas: {e}")
             metrics_str = ""
 
         return {**state, "metrics": metrics_str}
@@ -146,7 +160,7 @@ class Manager:
         visualize_last_30_days(df, file_30)
         visualize_last_12_months(df, file_12)
 
-        logging.info("Generated visualizations for the last 30 days and last 12 months.")
+        logging.info(f"[GOVERNANÇA - GRÁFICOS] Gráficos de visualização (30 dias e 12 meses) gerados em {OUTPUT_DIR}")
 
         return {**state, "chart_30_path": file_30, "chart_12_path": file_12}
 
@@ -161,12 +175,12 @@ class Manager:
         with open(output_md, "w", encoding="utf-8") as f:
             f.write(str(state.get("answer", "")))
 
-        logging.info("Final answer written to Output.md file.")
+        logging.info(f"[GOVERNANÇA - ARTEFATOS] Resposta do agente gravada em {output_md}")
 
         unified_md = os.path.join(OUTPUT_DIR, "unified_repo.md")
         UnifyRepository(output_md, output_json, file_30, file_12, output_md, output_json, unified_md)
 
-        logging.info("Unified repository files into unified_repo.md.")
+        logging.info(f"[GOVERNANÇA - ARTEFATOS] Repositório final unificado gerado com sucesso em {unified_md}")
 
         return {**state, "unified_md_path": unified_md}
 
@@ -197,7 +211,6 @@ class Manager:
 
         graph.set_entry_point("guardrail")
 
-        # Roteamento do Guardrail de Entrada
         graph.add_conditional_edges(
             "guardrail", 
             self.route_after_input_guardrail, 
@@ -225,38 +238,36 @@ class Manager:
         graph.add_edge("finalize", END)
         graph.add_edge("reject", END)
 
-        logging.info("Manager graph built successfully with fully orchestrated nodes.")
+        logging.info("[GOVERNANÇA] Grafo LangGraph compilado com sucesso com 9 nós orquestrados.")
         return graph.compile()
   
     def answer_node(self, state: ManagerState) -> ManagerState:
-        prompt_template = """Você é um agente especialista em síndromes respiratórias agudas graves (SRAG).
-                Use as informações recuperadas da base de dados (RAG) e da Internet para responder à pergunta do usuário
-                de forma completa e precisa. Também inclua as métricas no contexto da resposta, explicando o significado de cada métrica e suas implicações para a Síndrome Respiratória Aguda Grave (SRAG).
+        prompt_template = """Você é um agente especialista em Síndromes Respiratórias Agudas Graves (SRAG).
+                Use as informações recuperadas da base de dados (RAG) e da Internet para responder à pergunta do usuário de forma completa, precisa e clinicamente fundamentada.
                 
-                Você deve mostrar os valores, comentar e analisar as seguintes métricas disponíveis na base de dados: 
-                - taxa de aumento de casos, mostre o valor da taxa de aumento de casos
-                - taxa de mortalidade, mostre o valor da taxa de mortalidade
-                - taxa de ocupação de UTI, , mostre o valor da taxa de UTI
-                - taxa de vacinação da população, , mostre o valor da taxa de vacinação da população 
-                - taxa de pessoas em grupos de risco, mostre o valor da taxa de vacinação de grupos de risco
-                - taxa de pessoas com  contato com aves e suinos, mostre o valor da taxa de pessoas com contato com aves e suinos 
-                - taxa de pessoas com febre, mostre o valor da taxa de pessoas com febre 
-                - taxa de evolução do quado da doença, mostre o valor da taxa de evolução do quadro da doença 
-                - taxa de pessoas com sintomas respiratórios, mostre o valor da taxa de pessoas com sintomas respiratórios
-                - taxa de pessoas com dispneia, mostre o valor da taxa de pessoas com dispneia 
-                - taxa de surtos de SG, mostre o valor da taxa de surtos de SG 
-                - taxa da utilização de antivirais, mostre o valor da taxa de utilização de antivirais
+                No bloco 'Informações das métricas', você receberá um JSON contendo EXATAMENTE as seguintes 10 métricas epidemiológicas calculadas a partir da base oficial:
+                1. Proporção de casos notificados (Variação percentual do aumento de casos nos últimos 30 dias vs 30 dias anteriores)
+                2. uso antiviral (Percentual de utilização de tratamento antiviral)
+                3. casos de contato com aves e suinos (Percentual de pacientes com exposição a aves ou suínos)
+                4. casos de febre (Percentual de pacientes que apresentaram febre)
+                5. casos de dispneia (Percentual de pacientes que apresentaram dispneia / dificuldade respiratória)
+                6. Proporção de pessoas em fator de risco (Percentual de pacientes com fatores de risco / comorbidades)
+                7. Proporção de pessoas vacinadas (Percentual de pacientes com registro de vacinação)
+                8. Proporção de pacientes na UTI (Percentual de internações em UTI)
+                9. evolução da doença (Percentual de mortalidade / óbitos entre os casos concluídos)
+                10. casos de surto sg (Percentual de casos vinculados a surtos de Síndrome Gripal)
                 
-               É necessário que você sempre inclua:
-                - explicações clínicas,
-                - fatores de risco,
-                - recomendações de saúde pública.
+                REGRAS DE COERÊNCIA OBRIGATÓRIAS:
+                - Você DEVE utilizar os valores EXATOS numéricos fornecidos no JSON de métricas para comentar cada uma dessas 10 métricas.
+                - NÃO invente, extrapole ou cite métricas que não estejam presentes no JSON fornecido.
+                - Explique o significado clínico, riscos epidemiológicos e recomendações de saúde pública para cada valor apresentado.
+                - Forneça fontes e links de referência confiáveis sempre que possível.
 
                 ================================
-                Informações recuperadas do banco de dados:
+                Informações recuperadas do banco de dados (RAG):
                 {retrived_docs}
 
-                Informações das metrícas: 
+                Informações das métricas (JSON Oficial): 
                 {metrics}
 
                 ================================
@@ -267,16 +278,15 @@ class Manager:
                 {question}
 
                 ================================
-                FORMATO FINAL OBRIGATÓRIO
+                FORMATO FINAL OBRIGATÓRIO DE RESPOSTA (MARKDOWN)
                 ================================
 
-                1. Primeiro, um arquivo do tipo md bem formatado contendo:
-                - título
-                - análise
-                - tabelas se necessário
-                - recomendações clínicas
-
-              Gere um arquivo do tipo md detalhado como resposta final à pergunta do usuário.
+                Gere um relatório em Markdown bem estruturado contendo:
+                - Título descritivo
+                - Análise Epidemiológica Detalhada (discutindo as 10 métricas com seus valores numéricos exatos)
+                - Tabela Resumo das Métricas (colunas: Métrica | Valor Exato | Comentário Clínico)
+                - Recomendações de Saúde Pública e Manejo Clínico
+                - Fontes e Referências Confiáveis
         """    
         prompt = PromptTemplate(
             input_variables=["question", "retrived_docs", "internet_results", "metrics"],
@@ -294,13 +304,18 @@ class Manager:
             metrics=state.get("metrics",""), 
         )
 
+        logging.info("[GOVERNANÇA - SÍNTESE] Invocando LLM (gpt-4o-mini) para sintetizar resposta final com dados do RAG, Métricas e Internet.")
         response = self.llm.invoke(prompt_filled)
 
-        logging.info("Generated answer using LLM based on retrieved documents and internet results and built one prompt with role and information for Manager Agent.")
+        logging.info(f"[GOVERNANÇA - SÍNTESE] Resposta gerada com sucesso ({len(response.content)} caracteres).")
 
         return {**state, "answer": response.content}  
     
     def run_agent(self, question: str) -> str:
+        logging.info("================================================================================")
+        logging.info(f"[GOVERNANÇA - EXECUÇÃO] Nova pergunta enviada ao sistema: '{question}'")
+        logging.info("================================================================================")
+        
         initial_state: ManagerState = {
             "question": question,
             "retrived_docs": "",
@@ -310,4 +325,5 @@ class Manager:
         }
         
         final_state = self.graph.invoke(initial_state)
+        logging.info("[GOVERNANÇA - FIM] Execução do agente finalizada.")
         return final_state.get("answer", "")
