@@ -106,13 +106,11 @@ class MetricsCalculator:
 
         interval_df = df[(df['DT_NOTIFIC'] >= start_date) & (df['DT_NOTIFIC'] <= end_date)]
 
-        fator_risc_evolution = interval_df[interval_df['FATOR_RISC'].isin(["Sim", "Não"])]
-
-        if fator_risc_evolution.empty: 
+        if interval_df.empty: 
             logging.info("No 'FATOR_RISC' cases found in the specified date range.") 
             return 0.0
-        fator_risc_case = fator_risc_evolution[fator_risc_evolution['FATOR_RISC'] == "Sim"].shape[0]
-        percentage = (fator_risc_case / fator_risc_evolution.shape[0]) * 100
+        fator_risc_case = interval_df[interval_df['FATOR_RISC'] == "Sim"].shape[0]
+        percentage = (fator_risc_case / interval_df.shape[0]) * 100
         logging.info(f"Percentage of 'FATOR_RISC' cases calculated: {percentage:.2f}%") 
         return percentage
   
