@@ -1,6 +1,23 @@
-venv
+# Ambientes virtuais e variáveis de ambiente
+venv/
+.venv/
 .env
+
+# Cache do Python
 __pycache__/
-*.pyc
-datalake/
-output/
+*.py[cod]
+*$py.class
+
+# Pytest e Notebooks
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Diagramas e arquivos PDF
+Agent_Diagram.pdf
+
+# Dados e saídas locais (ignora conteúdos, mas preserva arquivos .gitkeep)
+datalake/*
+!datalake/**/.gitkeep
+
+output/*
+!output/**/.gitkeep
